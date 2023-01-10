@@ -5,7 +5,6 @@ import app from '../../src/app';
 import { readLatestRentId } from '../util/mailReader';
 
 let token, adminToken;
-let otherRentsCount = 2;
 
 beforeAll(async () => {
     const resUser = await request(app)
@@ -27,7 +26,6 @@ describe('Test user rent list', () => {
             .set('Auth', token)
             .expect(200)
             .then((res) => {
-                otherRentsCount = res.body.data.length;
                 expect(res.body.message).toBe('Query Success');
             });
     });
@@ -45,28 +43,17 @@ describe('Test user rent request', () => {
                 expect(res.body.waiting).toBe(false);
             });
     });
-
-    test('It should proceed the rent request and add to waiting list.', async () => {
-        // make sure rent is enough to be in waiting list
-        if (otherRentsCount !== 2) {
-            for (let i = otherRentsCount; i < otherRentsCount; ++i) {
-                await request(app)
-                    .post('/api/rent/register')
-                    .set('Auth-Method', 'JWT')
-                    .set('Auth', token);
-            }
-        }
-
+    test('It should block the second rent request.', () => {
         return request(app)
             .post('/api/rent/register')
             .set('Auth-Method', 'JWT')
             .set('Auth', token)
-            .expect(200)
+            .expect(409)
             .then((res) => {
-                expect(res.body.message).toBe('Registration successful');
-                expect(res.body.waiting).toBe(true);
+                expect(res.body.message).toBe('Too many rents');
             });
     });
+
     test('It should have user rents not empty.', () => {
         return request(app)
             .get('/api/user')
@@ -76,6 +63,41 @@ describe('Test user rent request', () => {
             .then((res) => {
                 expect(res.body.message).toBe('Query Success');
                 expect(res.body.rents.length).not.toBe(0);
+            });
+    });
+});
+
+describe('Test rent wait list', () => {
+    let tempToken = '';
+    beforeAll(async () => {
+
+        const resUser = await request(app)
+            .post('/api/user/login')
+            .send({ email: 'Victor.Von@gmail.com', password: 'demo' });
+        tempToken = resUser.body.token;
+    });
+
+    test('It should proceed the rent request and add to waiting list.', async () => {
+        return request(app)
+            .post('/api/rent/register')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', tempToken)
+            .expect(200)
+            .then((res) => {
+                expect(res.body.message).toBe('Registration successful');
+                expect(res.body.waiting).toBe(true);
+            });
+    });
+
+    test('It should skip the rent without container.', () => {
+        return request(app)
+            .get('/api/user')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', tempToken)
+            .expect(200)
+            .then((res) => {
+                expect(res.body.message).toBe('Query Success');
+                expect(res.body.rents.length).toBe(0);
             });
     });
 
@@ -408,9 +430,7 @@ describe('Test file delete', () => {
     test('It should proceed rent delete without plant data.', async () => {
         return request(app)
             .delete(
-                `/api/admin/rent/${readLatestRentId(
-                    'Eula_Ritchie@hotmail.com'
-                )}`
+                `/api/admin/rent/${readLatestRentId('Victor.Von@gmail.com')}`
             )
             .set('Auth-Method', 'JWT')
             .set('Auth', adminToken)

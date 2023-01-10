@@ -11,6 +11,7 @@ import { validateEmail } from '../services/mailSender';
 import { roles } from '../middlewares/permission';
 import { sendAdminRegisterEmail } from '../services/mailTemplate';
 import { memberList, queryMemberByUUID, updateMember } from '../services/memberShip';
+import { getDeadline, getRentLimit, getUpdateHistory, update } from '../services/config';
 
 const getRentedList = async (req, res) => {
     return res.status(200).json({
@@ -263,6 +264,44 @@ const deleteMember = async (req, res) => {
     });
 };
 
+const updateConfig = async (req, res) => {
+    if (!req.body.deadline && !req.body.rentLimit) {
+        return res.status(400).json({
+            message: 'Invalid body'
+        });
+    }
+
+    await update(
+        req.body.deadline || getDeadline(),
+        req.body.rentLimit || getRentLimit(),
+        req.userId
+    );
+
+    return res.status(200).json({
+        message: 'Update successful'
+    });
+};
+
+const listConfig = async (req, res) => {
+    const updateHistory = (await getUpdateHistory()).map(config => ({
+        deadline: config.Deadline,
+        rentLimit: config.Rent_Limit,
+        updatedBy: config.User ? config.User.Name : 'SYSTEM',
+        updatedAt: config.updatedAt
+    }));
+
+    return res.status(200).json({
+        message: 'Query success',
+        data: {
+            current: {
+                deadline: getDeadline(),
+                rentLimit: getRentLimit()
+            },
+            history: updateHistory
+        }
+    });
+};
+
 export {
     getRentedList,
     getWaitList,
@@ -271,6 +310,8 @@ export {
     markRentTaken,
     createAdminAccount,
     updateMemberRequest,
+    updateConfig,
+    listConfig,
     deleteMember,
     getMembers,
     updateMemberData,

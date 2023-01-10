@@ -1,10 +1,11 @@
 import { getEmptyContainers } from '../services/container';
 import { createPlant, getPlant, updatePlant } from '../services/plant';
-import { assignContainer, assignPlant, getOtherUserRentData, getRentById, getWaitingRents, insertRent } from '../services/rent';
+import { assignContainer, assignPlant, getOtherUserRentData, getRentById, getUserRents, getWaitingRents, insertRent } from '../services/rent';
 import { join } from 'path';
 import { existsSync, unlinkSync } from 'fs';
 import { getUserFromID } from '../services/user';
 import { sendRentAvailableEmail } from '../services/mailTemplate';
+import { getDeadline, getRentLimit } from '../services/config';
 
 const listOtherRents = async (req, res) => {
     res.status(200).json({
@@ -14,6 +15,14 @@ const listOtherRents = async (req, res) => {
 };
 
 const registerRent = async (req, res) => {
+    const rents = await getUserRents(req.userId);
+
+    if (rents.length >= getRentLimit()) {
+        return res.status(409).json({
+            message: 'Too many rents'
+        });
+    }
+
     const insertedRent = await insertRent(req.userId);
 
     await autoAssignContainer();
@@ -32,7 +41,7 @@ const autoAssignContainer = async () => {
         let index = 0;
         for (const rent of waitingList) {
             const user = await getUserFromID(rent.User_ID);
-            await assignContainer(rent.ID, emptyContainers[index++].id);
+            await assignContainer(rent.ID, emptyContainers[index++].id, getDeadline());
 
             const newRent = await getRentById(rent.ID);
 

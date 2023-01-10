@@ -105,8 +105,7 @@ const markContainerTaken = ID =>
         Get_Time: new Date()
     }, { where: { ID } });
 
-
-const assignContainer = (ID, containerId, deadline = 5) =>
+const assignContainer = (ID, containerId, deadline) =>
     db.Rent.update({
         Container_ID: containerId,
         Rent_Time: new Date(),

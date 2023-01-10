@@ -1,5 +1,5 @@
 import express from 'express';
-import { createAdminAccount, deleteMember, deleteAdmin, deleteRent, getMembers, getAdmins, getRentAmount, getRentedList, getWaitList, markRentTaken, updateMemberData, updateMemberRequest } from '../controllers/admin';
+import { createAdminAccount, deleteMember, deleteAdmin, deleteRent, getMembers, getAdmins, getRentAmount, getRentedList, getWaitList, listConfig, markRentTaken, updateConfig, updateMemberData, updateMemberRequest } from '../controllers/admin';
 const router = express.Router();
 
 import { verifyToken } from '../middlewares/authJWT';
@@ -28,5 +28,9 @@ router.get('/admin', verifyToken, checkAdmin, getAdmins);
 router.post('/admin', verifyToken, checkAdmin, createAdminAccount);
 
 router.delete('/admin/:id', verifyToken, checkAdmin, deleteAdmin);
+
+router.get('/config', verifyToken, checkAdmin, listConfig);
+
+router.put('/config', verifyToken, checkAdmin, updateConfig);
 
 export default router;

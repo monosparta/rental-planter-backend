@@ -335,3 +335,63 @@ describe('Test get and delete admin', () => {
             });
     });
 });
+
+describe('Test config manage', () => {
+    test('It should block modify config with an empty body', () => {
+        return request(app)
+            .put('/api/admin/config')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', token)
+            .expect(400)
+            .then((res) => {
+                expect(res.body.message).toBe('Invalid body');
+            });
+    });
+    test('It should proceed modify config (1/3).', () => {
+        return request(app)
+            .put('/api/admin/config')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', token)
+            .send({ deadline: 4 })
+            .expect(200)
+            .then((res) => {
+                expect(res.body.message).toBe('Update successful');
+            });
+    });
+    test('It should proceed modify config (2/3).', () => {
+        return request(app)
+            .put('/api/admin/config')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', token)
+            .send({ rentLimit: 4 })
+            .expect(200)
+            .then((res) => {
+                expect(res.body.message).toBe('Update successful');
+            });
+    });
+    test('It should proceed modify config (3/3).', () => {
+        return request(app)
+            .put('/api/admin/config')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', token)
+            .send({ deadline: 5, rentLimit:1 })
+            .expect(200)
+            .then((res) => {
+                expect(res.body.message).toBe('Update successful');
+            });
+    });
+    test('It should proceed getting config.', () => {
+        return request(app)
+            .get('/api/admin/config')
+            .set('Auth-Method', 'JWT')
+            .set('Auth', token)
+            .expect(200)
+            .then((res) => {
+                expect(res.body.message).toBe('Query success');
+                expect(res.body.data).toBeDefined();
+                expect(res.body.data.current).toBeDefined();
+                expect(res.body.data.history).toBeDefined();
+                expect(res.body.data.history.length).not.toBe(0);
+            });
+    });
+});

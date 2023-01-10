@@ -254,6 +254,14 @@ paths:
                 $ref: '#/components/schemas/GenericResponse'
               example:
                 message: "Invalid JWT token"
+        '409':
+          description: Too many rents
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Too many rents"
   /rent/plantInfo:
     post:
       tags:
@@ -1075,6 +1083,95 @@ paths:
                 $ref: '#/components/schemas/GenericResponse'
               example:
                 message: "User not found"
+  /admin/config:
+    get:
+      tags:
+        - admin
+      summary: Get config
+      security:
+        - auth: []
+          authMethod: []
+      responses:
+        '200':
+          description: Query Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConfigResponse'
+        '400':
+          description: Invalid header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Invalid header"
+        '401':
+          description: Invalid JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Invalid JWT token"
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Permission denied"
+    put:
+      tags:
+        - admin
+      summary: Modify config
+      security:
+        - auth: []
+          authMethod: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Config'
+      responses:
+        '200':
+          description: Update successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Update successful"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              examples:
+                'Invalid header':
+                  value:
+                    message: "Invalid header"
+                'Invalid body':
+                  value:
+                    message: "Invalid body"
+        '401':
+          description: Invalid JWT token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Invalid JWT token"
+        '403':
+          description: Permission denied
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+              example:
+                message: "Permission denied"
 
 # components
 components:
@@ -1169,6 +1266,34 @@ components:
         minHumid:
           type: integer
           format: int32
+    Config:
+      type: object
+      properties:
+        deadline:
+          type: integer
+        rentLimit:
+          type: integer
+    ConfigHistory:
+      type: object
+      properties:
+        deadline:
+          type: integer
+        rentLimit:
+          type: integer
+        updatedBy:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    ConfigData:
+      type: object
+      properties:
+        current:
+          $ref: '#/components/schemas/Config'
+        history:
+          type: array
+          items:
+            $ref: '#/components/schemas/ConfigHistory'
 
     # request
     AuthRequest:
@@ -1183,7 +1308,6 @@ components:
       properties:
         email:
           type: string
-
 
     # response
     LoginSuccessResponse:
@@ -1222,3 +1346,10 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/Rent'
+    ConfigResponse:
+      type: object
+      properties:
+        message:
+          type: string
+        data:
+         $ref: '#/components/schemas/ConfigData'

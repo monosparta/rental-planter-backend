@@ -29,7 +29,7 @@ const upload = multer({
 const handleFileUpload = (req, res, next) => {
     upload(req, res, (err) => {
         if (err instanceof multer.MulterError) {
-            return res.status(400).json({ messsage: err.message });
+            return res.status(400).json({ message: err.message });
         } else if (err) {
             /* istanbul ignore next */
             return next(err);

@@ -44,6 +44,8 @@
   - [GET /admin/admin](#get-admin-admin)
   - [POST /admin/admin](#post-admin-admin)
   - [DELETE /admin/admin/{userId}](#delete-admin-admin)
+  - [GET /admin/config](#get-admin-config)
+  - [PUT /admin/config](#put-admin-config)
 
 <span id="user-api"></span>
 
@@ -429,6 +431,7 @@
 |200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Registration successful|Inline|
 |400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Invalid header|[GenericResponse](#schemagenericresponse)|
 |401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Invalid JWT token|[GenericResponse](#schemagenericresponse)|
+|409|[Conflict](https://tools.ietf.org/html/rfc7231#section-6.5.8)|Too many rents|[GenericResponse](#schemagenericresponse)|
 
 #### 200 回應參數
 
@@ -461,6 +464,14 @@
 ```json
 {
   "message": "Invalid JWT token"
+}
+```
+
+> 409 Response
+
+```json
+{
+  "message": "Too many rents"
 }
 ```
 
@@ -1508,6 +1519,146 @@ Status Code **200**
 }
 ```
 
+---
+<span id="get-admin-config"></span>
+
+## `GET /admin/config`
+*Get config*
+
+> 需要 [Header](#header)
+
+### 回應
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Query Success|[ConfigResponse](#schemaconfigresponse)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Invalid header|[GenericResponse](#schemagenericresponse)|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Invalid JWT token|[GenericResponse](#schemagenericresponse)|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Permission denied|[GenericResponse](#schemagenericresponse)|
+
+#### 範例回應：
+
+> 200 Response
+
+```json
+{
+  "message": "string",
+  "data": {
+    "current": {
+      "deadline": 0,
+      "rentLimit": 0
+    },
+    "history": [
+      {
+        "deadline": 0,
+        "rentLimit": 0,
+        "updatedBy": "string",
+        "updatedAt": "2019-08-24T14:15:22Z"
+      }
+    ]
+  }
+}
+```
+
+> 400 Response
+
+```json
+{
+  "message": "Invalid header"
+}
+```
+
+> 401 Response
+
+```json
+{
+  "message": "Invalid JWT token"
+}
+```
+
+> 403 Response
+
+```json
+{
+  "message": "Permission denied"
+}
+```
+---
+<span id="put-admin-config"></span>
+
+## `PUT /admin/config`
+*Modify config*
+
+> 需要 [Header](#header)
+
+### Body
+> Content Type: `application/json`
+
+```json
+{
+  "deadline": 0,
+  "rentLimit": 0
+}
+```
+
+#### Body 參數
+
+|Name|In|Type|Required|Description|
+|---|---|---|---|---|
+|body|body|[Config](#schemaconfig)|false|none|
+
+### 回應
+
+|Status|Meaning|Description|Schema|
+|---|---|---|---|
+|200|[OK](https://tools.ietf.org/html/rfc7231#section-6.3.1)|Update successful|[GenericResponse](#schemagenericresponse)|
+|400|[Bad Request](https://tools.ietf.org/html/rfc7231#section-6.5.1)|Invalid request|[GenericResponse](#schemagenericresponse)|
+|401|[Unauthorized](https://tools.ietf.org/html/rfc7235#section-3.1)|Invalid JWT token|[GenericResponse](#schemagenericresponse)|
+|403|[Forbidden](https://tools.ietf.org/html/rfc7231#section-6.5.3)|Permission denied|[GenericResponse](#schemagenericresponse)|
+
+#### 範例回應：
+
+> 200 Response
+
+```json
+{
+  "message": "Update successful"
+}
+```
+
+> 400 Invalid request
+
+> Invalid header
+```json
+{
+  "message": "Invalid header"
+}
+```
+
+> Invalid body
+```json
+{
+  "message": "Invalid body"
+}
+```
+
+> 401 Response
+
+```json
+{
+  "message": "Invalid JWT token"
+}
+```
+
+> 403 Response
+
+```json
+{
+  "message": "Permission denied"
+}
+```
+
+
 # Schemas
 
 <h2 id="tocS_User">User</h2>
@@ -1659,6 +1810,86 @@ Status Code **200**
 |imgPath|string|false|none|none|
 |nickName|string|false|none|none|
 |minHumid|integer(int32)|false|none|none|
+
+<h2 id="tocS_Config">Config</h2>
+<!-- backwards compatibility -->
+<a id="schemaconfig"></a>
+<a id="schema_Config"></a>
+<a id="tocSconfig"></a>
+<a id="tocsconfig"></a>
+
+```json
+{
+  "deadline": 0,
+  "rentLimit": 0
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|deadline|integer|false|none|none|
+|rentLimit|integer|false|none|none|
+
+<h2 id="tocS_ConfigHistory">ConfigHistory</h2>
+<!-- backwards compatibility -->
+<a id="schemaconfighistory"></a>
+<a id="schema_ConfigHistory"></a>
+<a id="tocSconfighistory"></a>
+<a id="tocsconfighistory"></a>
+
+```json
+{
+  "deadline": 0,
+  "rentLimit": 0,
+  "updatedBy": "string",
+  "updatedAt": "2019-08-24T14:15:22Z"
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|deadline|integer|false|none|none|
+|rentLimit|integer|false|none|none|
+|updatedBy|string|false|none|none|
+|updatedAt|string(date-time)|false|none|none|
+
+<h2 id="tocS_ConfigData">ConfigData</h2>
+<!-- backwards compatibility -->
+<a id="schemaconfigdata"></a>
+<a id="schema_ConfigData"></a>
+<a id="tocSconfigdata"></a>
+<a id="tocsconfigdata"></a>
+
+```json
+{
+  "current": {
+    "deadline": 0,
+    "rentLimit": 0
+  },
+  "history": [
+    {
+      "deadline": 0,
+      "rentLimit": 0,
+      "updatedBy": "string",
+      "updatedAt": "2019-08-24T14:15:22Z"
+    }
+  ]
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|current|[Config](#schemaconfig)|false|none|none|
+|history|[[ConfigHistory](#schemaconfighistory)]|false|none|none|
 
 <h2 id="tocS_AuthRequest">AuthRequest</h2>
 <!-- backwards compatibility -->
@@ -1836,4 +2067,39 @@ Status Code **200**
 |Name|Type|Required|Restrictions|Description|
 |---|---|---|---|---|
 |data|[[Rent](#schemarent)]|false|none|none|
+
+<h2 id="tocS_ConfigResponse">ConfigResponse</h2>
+<!-- backwards compatibility -->
+<a id="schemaconfigresponse"></a>
+<a id="schema_ConfigResponse"></a>
+<a id="tocSconfigresponse"></a>
+<a id="tocsconfigresponse"></a>
+
+```json
+{
+  "message": "string",
+  "data": {
+    "current": {
+      "deadline": 0,
+      "rentLimit": 0
+    },
+    "history": [
+      {
+        "deadline": 0,
+        "rentLimit": 0,
+        "updatedBy": "string",
+        "updatedAt": "2019-08-24T14:15:22Z"
+      }
+    ]
+  }
+}
+
+```
+
+### Properties
+
+|Name|Type|Required|Restrictions|Description|
+|---|---|---|---|---|
+|message|string|false|none|none|
+|data|[ConfigData](#schemaconfigdata)|false|none|none|
 
